@@ -1,0 +1,135 @@
+{
+  "Dr_Remzi_YILDIRIM": {
+    "ad_soyad": "Prof. Dr. Remzi YILDIRIM",
+    "eposta": "remzi.yildirim@gop.edu.tr",
+    "ic_hat": "2908",
+    "calisma_alanlari": "Gömülü Sistemler, Bilgi Sistemleri, Bilgisayar Sistem Yapısı ve Donanımı",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Dr_Remzi_YILDIRIM.jpeg"
+  },
+  "ogr_uyesi_Cengiz_GuNGoR": {
+    "ad_soyad": "Dr. Öğr. Üyesi Cengiz GÜNGÖR",
+    "eposta": "cengiz.gungor@gop.edu.tr",
+    "ic_hat": "2937",
+    "calisma_alanlari": "Sanal Gerçeklik; Paralel Programlama",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Cengiz_GuNGoR.jpeg"
+  },
+  "ogr_uyesi_Kenan_ZENGiN": {
+    "ad_soyad": "Dr. Öğr. Üyesi Kenan ZENGİN",
+    "eposta": "kenan.zengin@gop.edu.tr",
+    "ic_hat": "2930",
+    "calisma_alanlari": "Veri Madenciliği ; Bilgisayar Yazılımı ; Yapay Zeka",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Kenan_ZENGiN.png"
+  },
+  "ogr_uyesi_Mahir_KAYA": {
+    "ad_soyad": "Dr. Öğr. Üyesi Mahir KAYA",
+    "eposta": "mahir.kaya@gop.edu.tr",
+    "ic_hat": "2936",
+    "calisma_alanlari": "Mobil Bulut Bilişim; Bilgisayar Yazılımı; Makine Öğrenmesi",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Mahir_KAYA.png"
+  },
+  "Dr_Turgut_oZSEVEN": {
+    "ad_soyad": "Doç. Dr. Turgut ÖZSEVEN",
+    "eposta": "turgut.ozseven@gop.edu.tr",
+    "ic_hat": "2938",
+    "calisma_alanlari": "Bilgisayar Yazılımı ; İnsan-Bilgisayar Etkileşimi ; Ses İşleme",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Dr_Turgut_oZSEVEN.png"
+  },
+  "ogr_uyesi_Yasemin_cETiN_KAYA": {
+    "ad_soyad": "Dr. Öğr. Üyesi Yasemin ÇETİN KAYA",
+    "eposta": "yasemin.kaya@gop.edu.tr",
+    "ic_hat": "2942",
+    "calisma_alanlari": "Yapay Öğrenme;İnsan-Bilgisayar Etkileşimi;İstatistik Modeller",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Yasemin_cETiN_KAYA.png"
+  },
+  "Dr_ozkan_iNiK": {
+    "ad_soyad": "Doç. Dr. Özkan İNİK",
+    "eposta": "ozkan.inik@gop.edu.tr",
+    "ic_hat": "2930",
+    "calisma_alanlari": "Derin Öğrenme; Makine Öğrenmesi; Yapay Öğrenme",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Dr_ozkan_iNiK.png"
+  },
+  "ogr_uyesi_Mursel_oNDER": {
+    "ad_soyad": "Dr. Öğr. Üyesi Mürsel ÖNDER",
+    "eposta": "mursel.onder@gop.edu.tr",
+    "ic_hat": "2933",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Mursel_oNDER.jpeg"
+  },
+  "ogr_uyesi_Ali_AKDAg": {
+    "ad_soyad": "Dr. Öğr. Üyesi Ali AKDAĞ",
+    "eposta": "ali.akdag@gop.edu.tr",
+    "ic_hat": "2940",
+    "calisma_alanlari": "Makine Öğrenmesi; Derin Öğrenme",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_Ali_AKDAg.png"
+  },
+  "ogr_uyesi_omer_YILMAZ": {
+    "ad_soyad": "Dr. Öğr. Üyesi Ömer YILMAZ",
+    "eposta": "omer.yilmaz@gop.edu.tr",
+    "ic_hat": "2878",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/ogr_uyesi_omer_YILMAZ.jpeg"
+  },
+  "Gor_Dr_Mustafa_ALTIOK": {
+    "ad_soyad": "Arş. Gör. Dr. Mustafa ALTIOK",
+    "eposta": "mustafa.altiok@gop.edu.tr",
+    "ic_hat": "2939",
+    "calisma_alanlari": "Optimizasyon; Makine Öğrenmesi",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Dr_Mustafa_ALTIOK.png"
+  },
+  "Gor_Aysegul_oZKAN_TEPE": {
+    "ad_soyad": "Arş. Gör. Ayşegül ÖZKAN TEPE",
+    "eposta": "aysegul.ozkantepe@gop.edu.tr",
+    "ic_hat": "2934",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Aysegul_oZKAN_TEPE.jpeg"
+  },
+  "Gor_Muhammed_cELiK": {
+    "ad_soyad": "Arş. Gör. Muhammed ÇELİK",
+    "eposta": "muhammed.celik@gop.edu.tr",
+    "ic_hat": "2968",
+    "calisma_alanlari": "Derin Öğrenme, Makine Öğrenmesi",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Muhammed_cELiK.png"
+  },
+  "Gor_Emirhan_AYDIN": {
+    "ad_soyad": "Arş. Gör. Emirhan AYDIN",
+    "eposta": "emirhan.aydin@gop.edu.tr",
+    "ic_hat": "2974",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Emirhan_AYDIN.jpeg"
+  },
+  "Gor_Okan_GuDER": {
+    "ad_soyad": "Arş. Gör. Okan GÜDER",
+    "eposta": "okan.guder@gop.edu.tr",
+    "ic_hat": "2965",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Okan_GuDER.png"
+  },
+  "Gor_Safa_Enes_TuRKOgLU": {
+    "ad_soyad": "Arş. Gör. Safa Enes TÜRKOĞLU",
+    "eposta": "safaenes.turkoglu@gop.edu.tr",
+    "ic_hat": "2969",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Safa_Enes_TuRKOgLU.png"
+  },
+  "Gor_Furkan_Sefa_DEMiRCi": {
+    "ad_soyad": "Arş. Gör. Furkan Sefa DEMİRCİ",
+    "eposta": "furkan.demirci@gop.edu.tr",
+    "ic_hat": "2877",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Furkan_Sefa_DEMiRCi.jpeg"
+  },
+  "Gor_Nurullah_oZTuRK": {
+    "ad_soyad": "Arş. Gör. Nurullah ÖZTÜRK",
+    "eposta": "nurullah.ozturk@gop.edu.tr",
+    "ic_hat": "2974",
+    "calisma_alanlari": "",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_Nurullah_oZTuRK.jpeg"
+  },
+  "Gor_ilker_GuNAY": {
+    "ad_soyad": "Öğr. Gör. İlker GÜNAY",
+    "eposta": "ilker.gunay@gop.edu.tr",
+    "ic_hat": "2935",
+    "calisma_alanlari": "Oyun programlama; Optimizasyon;Sanal Gerçeklik",
+    "foto": "ders_planlari_cikti/ogretim_elemanlari_foto/Gor_ilker_GuNAY.png"
+  }
+}

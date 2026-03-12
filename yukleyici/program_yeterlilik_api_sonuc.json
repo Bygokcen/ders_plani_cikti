@@ -1,0 +1,22 @@
+{
+  "base_url": "http://localhost:4000/dpks-api",
+  "bolum_id": "e1dacff2-0ec4-4f49-a2e7-8805be0a403f",
+  "year_id": "4dfe815a-260a-4a07-b42d-07c3fd35faee",
+  "dry_run": false,
+  "offering_count": 105,
+  "mapping_course_count": 57,
+  "applied_change_count": 266,
+  "created_outcomes": [],
+  "skipped_courses_not_found_in_offerings": [
+    "SEÇ201",
+    "SEÇ202",
+    "SEÇ301",
+    "SEÇ302",
+    "SEÇ401",
+    "SEÇ402"
+  ],
+  "bulk_update_response": {
+    "success": true,
+    "count": 266
+  }
+}
