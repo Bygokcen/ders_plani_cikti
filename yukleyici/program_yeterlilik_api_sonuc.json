@@ -1,9 +1,9 @@
 {
-  "base_url": "http://localhost:4000/dpks-api",
-  "bolum_id": "e1dacff2-0ec4-4f49-a2e7-8805be0a403f",
-  "year_id": "4dfe815a-260a-4a07-b42d-07c3fd35faee",
+  "base_url": "https://yzdd.gop.edu.tr/dpks-api",
+  "bolum_id": "e4c353b0-66fc-4926-b6f4-362a44a4f91a",
+  "year_id": "3f592639-b639-44ee-b15e-92e2bbf04184",
   "dry_run": false,
-  "offering_count": 105,
+  "offering_count": 103,
   "mapping_course_count": 57,
   "applied_change_count": 266,
   "created_outcomes": [],

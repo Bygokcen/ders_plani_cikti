@@ -112,50 +112,50 @@ def main():
     atlamaListesi = []
 
     for ders_kodu, ders in ders_planlari.items():
-    ogr_str  = ders.get('ogretim_uyesi', '').strip()
-    eposta_str = ders.get('eposta', '').strip()
+        ogr_str = ders.get('ogretim_uyesi', '').strip()
+        eposta_str = ders.get('eposta', '').strip()
 
-    if not ogr_str or ogr_str == 'Öğretim Üyesi':
-        continue  # atanacak kişi belli değil
+        if not ogr_str or ogr_str == 'Öğretim Üyesi':
+            continue  # atanacak kişi belli değil
 
-    # Offering var mı?
-    offering_id = kod_to_offering.get(ders_kodu.upper())
-    if not offering_id:
-        atlamaListesi.append(f'  ⚠️  {ders_kodu}: offering yok (akademik yılda bulunmuyor)')
-        continue
+        # Offering var mı?
+        offering_id = kod_to_offering.get(ders_kodu.upper())
+        if not offering_id:
+            atlamaListesi.append(f'  ⚠️  {ders_kodu}: offering yok (akademik yılda bulunmuyor)')
+            continue
 
-    # Birden fazla akademisyen olabilir (virgülle ayrılmış)
-    isimler = [i.strip() for i in ogr_str.split(',')]
-    epostalar = [e.strip() for e in eposta_str.split(',')]
+        # Birden fazla akademisyen olabilir (virgülle ayrılmış)
+        isimler = [i.strip() for i in ogr_str.split(',')]
+        epostalar = [e.strip() for e in eposta_str.split(',')]
 
-    faculty_ids = []
-    for i, isim in enumerate(isimler):
-        ep = epostalar[i] if i < len(epostalar) else ''
-        fid = find_faculty_id(email_to_id, name_to_id, ep, isim)
-        if fid:
-            if fid not in faculty_ids:
-                faculty_ids.append(fid)
+        faculty_ids = []
+        for i, isim in enumerate(isimler):
+            ep = epostalar[i] if i < len(epostalar) else ''
+            fid = find_faculty_id(email_to_id, name_to_id, ep, isim)
+            if fid:
+                if fid not in faculty_ids:
+                    faculty_ids.append(fid)
+            else:
+                atlamaListesi.append(f'  ❓  {ders_kodu}: "{isim}" ({ep}) bulunamadı')
+
+        if not faculty_ids:
+            atlamaListesi.append(f'  ⛔  {ders_kodu}: hiç akademisyen eşleşmedi')
+            continue
+
+        # PUT /offerings/{id}/instructors
+        put_r = requests.put(
+            f'{base_url}/offerings/{offering_id}/instructors',
+            headers=hdrs,
+            json={'ogretimElemaniIds': faculty_ids},
+            timeout=30,
+            verify=verify_ssl,
+        )
+        if put_r.status_code == 200:
+            isim_kisa = ', '.join(isimler)
+            print(f'  ✅  {ders_kodu}: {isim_kisa}')
+            atandi += 1
         else:
-            atlamaListesi.append(f'  ❓  {ders_kodu}: "{isim}" ({ep}) bulunamadı')
-
-    if not faculty_ids:
-        atlamaListesi.append(f'  ⛔  {ders_kodu}: hiç akademisyen eşleşmedi')
-        continue
-
-    # PUT /offerings/{id}/instructors
-    put_r = requests.put(
-        f'{base_url}/offerings/{offering_id}/instructors',
-        headers=hdrs,
-        json={'ogretimElemaniIds': faculty_ids},
-        timeout=30,
-        verify=verify_ssl,
-    )
-    if put_r.status_code == 200:
-        isim_kisa = ', '.join(isimler)
-        print(f'  ✅  {ders_kodu}: {isim_kisa}')
-        atandi += 1
-    else:
-        print(f'  ❌  {ders_kodu}: HTTP {put_r.status_code} - {put_r.text}')
+            print(f'  ❌  {ders_kodu}: HTTP {put_r.status_code} - {put_r.text}')
 
 # ── 6. Özet ───────────────────────────────────────────────────────────────
     print(f'\n--- ÖZET ---')
