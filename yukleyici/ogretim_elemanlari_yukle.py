@@ -2,12 +2,12 @@
 ogretim_elemanlari_yukle.py
 -----------------------------
 ogretim_elemanlari.json dosyasındaki öğretim elemanlarını
-çalışan Docker projesine (dpks_backend) API üzerinden ekler.
+API üzerinden ilgili bölüme ekler.
 
 Yapılan işlemler:
   1. API'ye giriş yap (admin@gop.edu.tr / admin123)
-  2. Fakülte listesinde "Mimarlık" / "Mühendislik" fakültesini bul (yoksa oluştur)
-  3. Bölüm listesinde "Bilgisayar Mühendisliği" bölümünü bul (yoksa oluştur)
+    2. Fakülte listesinde hedef fakülteyi bul (yoksa oluştur)
+    3. Bölüm listesinde hedef bölümü bul (yoksa oluştur)
   4. Her öğretim elemanı için:
        a. Fotoğrafı Docker container'a kopyala
        b. POST /dpks-api/faculty ile elemanı oluştur
@@ -33,10 +33,10 @@ CONTAINER_DIR = '/app/wwwroot/uploads/faculty'
 DEFAULT_JSON_PATH = str(Path(__file__).resolve().parents[1] / 'ogretim_elemanlari.json')
 DEFAULT_FOTO_DIR = str(Path(__file__).resolve().parents[1] / 'ogretim_elemanlari_foto')
 
-FAKULTE_AD  = 'Mimarlık ve Mühendislik Fakültesi'
-FAKULTE_KOD = 'MMF'
-BOLUM_AD    = 'Bilgisayar Mühendisliği'
-BOLUM_KOD   = 'BILMUH'
+DEFAULT_FAKULTE_AD = 'Mimarlık ve Mühendislik Fakültesi'
+DEFAULT_FAKULTE_KOD = 'MMF'
+DEFAULT_BOLUM_AD = 'Bilgisayar Mühendisliği'
+DEFAULT_BOLUM_KOD = 'BILMUH'
 
 # ─── Yardımcılar ──────────────────────────────────────────────────────────
 
@@ -44,33 +44,35 @@ def headers(token):
     return auth_headers(token)
 
 
-def get_or_create_fakulte(base_url, token, verify_ssl):
+def get_or_create_fakulte(base_url, token, verify_ssl, fakulte_ad, fakulte_kod):
     r = requests.get(f'{base_url}/fakulteler', headers=headers(token), timeout=20, verify=verify_ssl)
     r.raise_for_status()
     for f in r.json():
         ad = f.get('ad', '') or ''
-        if 'mimarlık' in ad.lower() or 'mühendislik' in ad.lower() or 'MMF' == f.get('kod', ''):
+        kod = f.get('kod', '') or ''
+        if ad.strip().lower() == fakulte_ad.strip().lower() or kod.strip().upper() == fakulte_kod.strip().upper():
             print(f'✅ Fakülte bulundu: {f["ad"]} ({f["id"][:8]}…)')
             return f['id']
 
     # Yoksa oluştur
     r2 = requests.post(f'{base_url}/fakulteler',
                        headers=headers(token),
-                       json={'ad': FAKULTE_AD, 'kod': FAKULTE_KOD, 'renk': '#1e40af'},
+                       json={'ad': fakulte_ad, 'kod': fakulte_kod, 'renk': '#1e40af'},
                        timeout=20,
                        verify=verify_ssl)
     r2.raise_for_status()
     fid = r2.json()['id']
-    print(f'🆕 Fakülte oluşturuldu: {FAKULTE_AD} ({fid[:8]}…)')
+    print(f'🆕 Fakülte oluşturuldu: {fakulte_ad} ({fid[:8]}…)')
     return fid
 
 
-def get_or_create_bolum(base_url, token, fakulte_id, verify_ssl):
+def get_or_create_bolum(base_url, token, fakulte_id, verify_ssl, bolum_ad, bolum_kod):
     r = requests.get(f'{base_url}/bolumler', headers=headers(token), timeout=20, verify=verify_ssl)
     r.raise_for_status()
     for b in r.json():
         ad = b.get('ad', '') or ''
-        if 'bilgisayar' in ad.lower() and 'müh' in ad.lower():
+        kod = b.get('kod', '') or ''
+        if ad.strip().lower() == bolum_ad.strip().lower() or kod.strip().upper() == bolum_kod.strip().upper():
             print(f'✅ Bölüm bulundu: {b["ad"]} ({b["id"][:8]}…)')
             return b['id']
 
@@ -78,8 +80,8 @@ def get_or_create_bolum(base_url, token, fakulte_id, verify_ssl):
     r2 = requests.post(f'{base_url}/bolumler',
                        headers=headers(token),
                        json={
-                           'ad': BOLUM_AD,
-                           'kod': BOLUM_KOD,
+                           'ad': bolum_ad,
+                           'kod': bolum_kod,
                            'fakulteId': fakulte_id,
                            'varsayilanSinifSayisi': 4
                        },
@@ -87,7 +89,7 @@ def get_or_create_bolum(base_url, token, fakulte_id, verify_ssl):
                        verify=verify_ssl)
     r2.raise_for_status()
     bid = r2.json()['id']
-    print(f'🆕 Bölüm oluşturuldu: {BOLUM_AD} ({bid[:8]}…)')
+    print(f'🆕 Bölüm oluşturuldu: {bolum_ad} ({bid[:8]}…)')
     return bid
 
 
@@ -197,6 +199,10 @@ def main():
     parser.add_argument('--foto-dir', default=DEFAULT_FOTO_DIR)
     parser.add_argument('--photo-mode', choices=['auto', 'api', 'docker', 'none'], default='auto')
     parser.add_argument('--container', default=CONTAINER)
+    parser.add_argument('--fakulte-ad', default=DEFAULT_FAKULTE_AD)
+    parser.add_argument('--fakulte-kod', default=DEFAULT_FAKULTE_KOD)
+    parser.add_argument('--bolum-ad', default=DEFAULT_BOLUM_AD)
+    parser.add_argument('--bolum-kod', default=DEFAULT_BOLUM_KOD)
     parser.add_argument('--insecure', action='store_true', help='SSL sertifika dogrulamasini kapatir')
     args = parser.parse_args()
 
@@ -220,8 +226,8 @@ def main():
     print(f'✅ Giriş başarılı: {args.email}')
 
     # ── 3. Fakülte / Bölüm
-    fakulte_id = get_or_create_fakulte(base_url, token, verify_ssl)
-    bolum_id   = get_or_create_bolum(base_url, token, fakulte_id, verify_ssl)
+    fakulte_id = get_or_create_fakulte(base_url, token, verify_ssl, args.fakulte_ad, args.fakulte_kod)
+    bolum_id   = get_or_create_bolum(base_url, token, fakulte_id, verify_ssl, args.bolum_ad, args.bolum_kod)
     print()
 
     # ── 4. Mevcut elemanları çek

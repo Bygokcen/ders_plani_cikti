@@ -11,8 +11,18 @@ import docx
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-DEFAULT_DOCX_PATH = ROOT_DIR / "Program_Kılavuzu_BILMUH2025-26_19022026 copy.docx"
 DEFAULT_JSON_OUT = Path(__file__).resolve().with_name("program_yeterlilikleri.json")
+
+
+def find_default_docx() -> Path | None:
+    candidates = sorted(ROOT_DIR.glob("*.docx"))
+    if not candidates:
+        return None
+
+    for candidate in candidates:
+        if "program_kılavuzu" in candidate.name.lower() or "program_kilavuzu" in candidate.name.lower():
+            return candidate
+    return candidates[0]
 
 
 def clean_text(value: str) -> str:
@@ -78,10 +88,14 @@ def extract_program_outcomes(docx_path: Path) -> dict:
 
 
 def main() -> None:
+    default_docx = find_default_docx()
     parser = argparse.ArgumentParser(description="DOCX'ten program yeterliliklerini cikarir")
-    parser.add_argument("--docx", default=str(DEFAULT_DOCX_PATH), help="Kaynak DOCX yolu")
+    parser.add_argument("--docx", default=str(default_docx) if default_docx else None, help="Kaynak DOCX yolu")
     parser.add_argument("--out", default=str(DEFAULT_JSON_OUT), help="Cikti JSON yolu")
     args = parser.parse_args()
+
+    if not args.docx:
+        raise FileNotFoundError("Kaynak DOCX bulunamadi. --docx ile dosya yolu verin.")
 
     docx_path = Path(args.docx)
     out_path = Path(args.out)

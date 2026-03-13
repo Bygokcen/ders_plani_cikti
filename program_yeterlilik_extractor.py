@@ -9,6 +9,7 @@ Girdi : /Users/gokcen/Downloads/Program_Kılavuzu_BILMUH2025-26_19022026.docx
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from datetime import datetime
@@ -16,8 +17,19 @@ from pathlib import Path
 
 import docx
 
-DOCX_PATH = Path("/Users/gokcen/Downloads/Program_Kılavuzu_BILMUH2025-26_19022026.docx")
-JSON_OUT = Path("/Users/gokcen/DPK/ders_planlari_cikti/ders_program_yeterlilikleri.json")
+ROOT_DIR = Path(__file__).resolve().parents[1]
+JSON_OUT = Path(__file__).resolve().with_name("ders_program_yeterlilikleri.json")
+
+
+def find_default_docx() -> Path | None:
+    candidates = sorted(ROOT_DIR.glob("*.docx"))
+    if not candidates:
+        return None
+
+    for candidate in candidates:
+        if "program_kılavuzu" in candidate.name.lower() or "program_kilavuzu" in candidate.name.lower():
+            return candidate
+    return candidates[0]
 
 
 def _clean(text: str) -> str:
@@ -135,16 +147,27 @@ def extract_relations(docx_path: Path) -> dict:
 
 
 def main() -> None:
-    if not DOCX_PATH.exists():
-        raise FileNotFoundError(f"DOCX bulunamadı: {DOCX_PATH}")
+    default_docx = find_default_docx()
+    parser = argparse.ArgumentParser(description="DOCX'ten ders-program yeterlilik matrisini cikarir")
+    parser.add_argument("--docx", default=str(default_docx) if default_docx else None, help="Kaynak DOCX yolu")
+    parser.add_argument("--out", default=str(JSON_OUT), help="Cikti JSON yolu")
+    args = parser.parse_args()
 
-    data = extract_relations(DOCX_PATH)
-    JSON_OUT.parent.mkdir(parents=True, exist_ok=True)
+    if not args.docx:
+        raise FileNotFoundError("Kaynak DOCX bulunamadi. --docx ile dosya yolu verin.")
 
-    with JSON_OUT.open("w", encoding="utf-8") as f:
+    docx_path = Path(args.docx)
+    json_out = Path(args.out)
+    if not docx_path.exists():
+        raise FileNotFoundError(f"DOCX bulunamadı: {docx_path}")
+
+    data = extract_relations(docx_path)
+    json_out.parent.mkdir(parents=True, exist_ok=True)
+
+    with json_out.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"JSON yazıldı: {JSON_OUT}")
+    print(f"JSON yazıldı: {json_out}")
     print(f"Ders sayısı: {data['ders_sayisi']}")
     print(f"Kullanılan tablo indexleri: {data['kullanilan_tablo_indexleri']}")
 

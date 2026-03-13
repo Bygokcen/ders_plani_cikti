@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-BILMUH 2025-26 Ders Planları Çıkarıcı
-======================================
-Kaynak: Program_Kılavuzu_BILMUH2025-26_19022026.docx
+Ders planı DOCX çıkarıcı
+========================
+Kaynak: program kılavuzu DOCX dosyası
 Çıktı : ders_planlari.json
-        ders_gorselleri/<DERS_KODU>/soru_N.{png|jpeg|emf}
+    ders_gorselleri/<DERS_KODU>/soru_N.{png|jpeg|emf}
 
 Özellikler:
   - Öğretim üyesi, oda, ofis saati, e-posta, ders zamanı, derslik
@@ -19,18 +19,20 @@ Kaynak: Program_Kılavuzu_BILMUH2025-26_19022026.docx
 Tarih: 2026-03-11
 """
 
+import argparse
 import docx
 import json
 import re
 import os
+from pathlib import Path
 
 from lxml import etree
 
 # ─── Sabitler ──────────────────────────────────────────────────────────────
 
-DOCX_PATH = '/Users/gokcen/DPK/Program_Kılavuzu_BILMUH2025-26_19022026 copy.docx'
-JSON_OUT  = '/Users/gokcen/DPK/ders_planlari.json'
-IMG_BASE  = '/Users/gokcen/DPK/ders_gorselleri'
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_JSON_OUT = Path(__file__).resolve().with_name('ders_planlari.json')
+DEFAULT_IMG_BASE = Path(__file__).resolve().with_name('ders_gorselleri')
 
 WNS  = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 M    = '{http://schemas.openxmlformats.org/officeDocument/2006/math}'
@@ -57,6 +59,16 @@ FUNC_MAP = {
     'lim': r'\lim',  'max': r'\max', 'min': r'\min',
     'det': r'\det',  'gcd': r'\gcd',
 }
+
+
+def find_default_docx() -> Path | None:
+    candidates = sorted(ROOT_DIR.glob('*.docx'))
+    if not candidates:
+        return None
+    for candidate in candidates:
+        if 'program_kılavuzu' in candidate.name.lower() or 'program_kilavuzu' in candidate.name.lower():
+            return candidate
+    return candidates[0]
 
 def omml_to_latex(elem):
     """OMML elementini özyinelemeli olarak LaTeX dizgesine çevirir."""
@@ -300,7 +312,7 @@ def extract_images(tc, doc_part, course_code, img_base):
                 f.write(img_bytes)
             
             # Proje köküne göre göreli yolu sakla (Users/gokcen/DPK temizlenerek)
-            rel_path = os.path.relpath(fpath, '/Users/gokcen/DPK')
+            rel_path = os.path.relpath(fpath, ROOT_DIR)
             saved.append(rel_path)
             
         except Exception as e:
@@ -519,7 +531,21 @@ def parse_weekly_table(tbl, course_code, doc_part, img_base):
 # ─── Ana çıkarım döngüsü ──────────────────────────────────────────────────
 
 def main():
-    doc      = docx.Document(DOCX_PATH)
+    default_docx = find_default_docx()
+    parser = argparse.ArgumentParser(description='DOCX\'ten ders planlarini cikarir')
+    parser.add_argument('--docx', default=str(default_docx) if default_docx else None, help='Kaynak DOCX yolu')
+    parser.add_argument('--out', default=str(DEFAULT_JSON_OUT), help='Cikti JSON yolu')
+    parser.add_argument('--img-base', default=str(DEFAULT_IMG_BASE), help='Gorsellerin yazilacagi klasor')
+    args = parser.parse_args()
+
+    if not args.docx:
+        raise FileNotFoundError('Kaynak DOCX bulunamadi. --docx ile dosya yolu verin.')
+
+    docx_path = Path(args.docx)
+    json_out = Path(args.out)
+    img_base = Path(args.img_base)
+
+    doc      = docx.Document(str(docx_path))
     body     = doc.element.body
     children = list(body)
     tables   = doc.tables
@@ -531,7 +557,7 @@ def main():
             elem_to_tbl[i] = ti
             ti += 1
 
-    os.makedirs(IMG_BASE, exist_ok=True)
+    os.makedirs(img_base, exist_ok=True)
     courses = {}
 
     i = 0
@@ -575,9 +601,9 @@ def main():
                 if tbls:
                     entry.update(parse_info_table(tbls[0]))
                 if len(tbls) >= 2:
-                    entry.update(parse_weekly_table(tbls[1], code, doc.part, IMG_BASE))
+                    entry.update(parse_weekly_table(tbls[1], code, doc.part, str(img_base)))
                 elif len(tbls) == 1:
-                    w = parse_weekly_table(tbls[0], code, doc.part, IMG_BASE)
+                    w = parse_weekly_table(tbls[0], code, doc.part, str(img_base))
                     if w['haftalik_plan'] or w['degerlendirme']:
                         entry.update(w)
 
@@ -585,17 +611,18 @@ def main():
 
         i += 1
 
-    with open(JSON_OUT, 'w', encoding='utf-8') as f:
+    json_out.parent.mkdir(parents=True, exist_ok=True)
+    with open(json_out, 'w', encoding='utf-8') as f:
         json.dump(courses, f, ensure_ascii=False, indent=2)
 
     print(f"Toplam ders: {len(courses)}")
-    print(f"JSON: {JSON_OUT}")
+    print(f"JSON: {json_out}")
     img_count = sum(
-        len(os.listdir(os.path.join(IMG_BASE, d)))
-        for d in os.listdir(IMG_BASE)
-        if os.path.isdir(os.path.join(IMG_BASE, d))
+        len(os.listdir(os.path.join(img_base, d)))
+        for d in os.listdir(img_base)
+        if os.path.isdir(os.path.join(img_base, d))
     )
-    print(f"Kaydedilen görsel: {img_count} dosya ({IMG_BASE})")
+    print(f"Kaydedilen görsel: {img_count} dosya ({img_base})")
     math_courses = [code for code, c in courses.items() if '$' in c.get('ornek_sorular', '')]
     img_courses  = [code for code, c in courses.items() if c.get('ornek_sorular_gorseller')]
     print(f"LaTeX math içeren: {math_courses}")
