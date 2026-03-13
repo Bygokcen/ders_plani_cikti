@@ -28,7 +28,7 @@ from lxml import etree
 
 # ─── Sabitler ──────────────────────────────────────────────────────────────
 
-DOCX_PATH = '/Users/gokcen/Downloads/Program_Kılavuzu_BILMUH2025-26_19022026.docx'
+DOCX_PATH = '/Users/gokcen/DPK/Program_Kılavuzu_BILMUH2025-26_19022026 copy.docx'
 JSON_OUT  = '/Users/gokcen/DPK/ders_planlari.json'
 IMG_BASE  = '/Users/gokcen/DPK/ders_gorselleri'
 
@@ -180,35 +180,78 @@ def omml_to_latex(elem):
     return ''.join(children_latex)
 
 
+def tbl_to_markdown(tbl_elem):
+    """Word tbl öğesini Markdown tablo dizgesine çevirir."""
+    rows = []
+    for tr in tbl_elem.findall(f'{WNS}tr'):
+        cells = []
+        for tc in tr.findall(f'{WNS}tc'):
+            # Her hücrenin içeriğini (metin + matematik) al
+            cell_text = cell_tc_to_rich_text(tc).replace('\n', '<br>')
+            cells.append(cell_text)
+        if cells:
+            rows.append(f"| {' | '.join(cells)} |")
+    
+    if not rows:
+        return ""
+    
+    # Header separator
+    col_count = len(rows[0].split('|')) - 2
+    header_sep = f"| {' | '.join(['---'] * col_count)} |"
+    if len(rows) > 1:
+        rows.insert(1, header_sep)
+    else:
+        rows.append(header_sep)
+        
+    return '\n'.join(rows)
+
+
 def cell_tc_to_rich_text(tc):
     """
     Bir tablo hücresinin (tc XML elemanı) içeriğini zengin metin olarak döner.
     - Normal metin: olduğu gibi
     - m:oMath inline: $...$
     - m:oMathPara display: $$...$$
+    - w:tbl: Markdown şeklinde
     """
     parts = []
-    for para in tc.findall(f'.//{WNS}p'):
-        para_parts = []
-        for child in para:
-            ctag = child.tag.split('}')[-1]
-            if ctag == 'r':
-                t = child.find(f'{WNS}t')
-                if t is not None and t.text:
-                    para_parts.append(t.text)
-            elif ctag == 'oMath':
-                latex = omml_to_latex(child).strip()
-                if latex:
-                    para_parts.append(f'${latex}$')
-            elif ctag == 'oMathPara':
-                for om in child.findall(f'{M}oMath'):
-                    latex = omml_to_latex(om).strip()
+    # Hücre içindeki tüm çocukları sırasıyla gezmek için p ve tbl etiketlerine bakarız
+    for child in tc:
+        ctag = child.tag.split('}')[-1]
+        
+        if ctag == 'p':
+            para_parts = []
+            for item in child:
+                itag = item.tag.split('}')[-1]
+                if itag == 'r':
+                    t = item.find(f'{WNS}t')
+                    if t is not None and t.text:
+                        para_parts.append(t.text)
+                elif itag == 'hyperlink':
+                    # Extract text from runs inside the hyperlink
+                    for hr in item.findall(f'{WNS}r'):
+                        ht = hr.find(f'{WNS}t')
+                        if ht is not None and ht.text:
+                            para_parts.append(ht.text)
+                elif itag == 'oMath':
+                    latex = omml_to_latex(item).strip()
                     if latex:
-                        para_parts.append(f'$${latex}$$')
-        line = ''.join(para_parts).strip()
-        if line:
-            parts.append(line)
-    return '\n'.join(parts)
+                        para_parts.append(f'${latex}$')
+                elif itag == 'oMathPara':
+                    for om in item.findall(f'{M}oMath'):
+                        latex = omml_to_latex(om).strip()
+                        if latex:
+                            para_parts.append(f'$${latex}$$')
+            line = ''.join(para_parts).strip()
+            if line:
+                parts.append(line)
+        
+        elif ctag == 'tbl':
+            md_table = tbl_to_markdown(child)
+            if md_table:
+                parts.append('\n' + md_table + '\n')
+                
+    return '\n'.join(parts).strip()
 
 
 # ─── Resim çıkarıcı ───────────────────────────────────────────────────────
@@ -219,27 +262,51 @@ def extract_images(tc, doc_part, course_code, img_base):
     Döndürür: proje köküne göre göreli yol listesi.
     """
     saved = []
+    # Standart DrawingML (inline & anchor)
     drawings = tc.findall(f'.//{DRAW}inline') + tc.findall(f'.//{DRAW}anchor')
-    for drawing in drawings:
-        blip = drawing.find(f'.//{{{A_NS}}}blip')
-        if blip is None:
-            continue
-        r_embed = blip.get(f'{{{EMB}}}embed')
-        if not r_embed:
-            continue
+    
+    # Legacy VML (pict) ve Objects
+    pict_elements = tc.findall(f'.//{{{WNS}}}pict')
+    object_elements = tc.findall(f'.//{{{WNS}}}object')
+
+    for elem in drawings + pict_elements + object_elements:
         try:
+            # DrawingML blip search
+            blip = elem.find(f'.//{{{A_NS}}}blip')
+            r_embed = None
+            if blip is not None:
+                r_embed = blip.get(f'{{{EMB}}}embed')
+            
+            # Legacy/VML search (imagedata, shape/imagedata vb)
+            if not r_embed:
+                imagedata = elem.find(f'.//{{{WNS}}}imagedata')
+                if imagedata is not None:
+                    r_embed = imagedata.get(f'{{{EMB}}}id')
+            
+            if not r_embed:
+                continue
+
             img_part  = doc_part.rels[r_embed].target_part
             img_bytes = img_part.blob
             ext       = img_part.partname.split('.')[-1].lower()
+            
             out_dir   = os.path.join(img_base, course_code)
             os.makedirs(out_dir, exist_ok=True)
+            
             fname = f'soru_{len(saved)+1}.{ext}'
             fpath = os.path.join(out_dir, fname)
+            
             with open(fpath, 'wb') as f:
                 f.write(img_bytes)
-            saved.append(fpath.replace('/Users/gokcen/DPK/', ''))
+            
+            # Proje köküne göre göreli yolu sakla (Users/gokcen/DPK temizlenerek)
+            rel_path = os.path.relpath(fpath, '/Users/gokcen/DPK')
+            saved.append(rel_path)
+            
         except Exception as e:
-            saved.append(f'[hata: {e}]')
+            # saved.append(f'[hata: {e}]')
+            continue # Hataları sessizce geç veya logla
+            
     return saved
 
 
@@ -254,7 +321,10 @@ def is_yellow_cell(cell):
     if tcpr is not None:
         shd = tcpr.find(f'{WNS}shd')
         if shd is not None:
-            return shd.get(f'{WNS}fill', '').upper() in ('FFFF00', 'FFFF01', 'FFF200', 'FFFF33')
+            fill = shd.get(f'{WNS}fill', '').upper()
+            # Lenient yellow detection: common codes and anything starting with FFF (mostly yellow/orange/light)
+            # FFFFFF is white, should be excluded.
+            return (fill.startswith('FFF') and fill != 'FFFFFF') or fill == 'YELLOW'
     return False
 
 
@@ -279,17 +349,30 @@ def _unique_cells(row):
 _KK_LABELS = ('Konu ve İlgili Kazanımlar', 'Konu ile İlgili Kazanımlar')
 
 
-def _add_kk_value(value, value_cell, result, current_topic):
+def _add_kk_value(value, value_cell, result, current_topic, table_has_yellow=True):
     """Bir konu/kazanım değerini sonuç listesine ekler; güncel topic'i döner."""
-    if is_yellow_cell(value_cell):          # sarı arka plan = konu başlığı
+    is_yellow = is_yellow_cell(value_cell)
+    
+    # "Konu ve ilgili kazanım" metni başlı başına bir kazanım veya konu olamaz.
+    if "konu ve" in value.lower() and "kazanım" in value.lower():
+        return current_topic
+
+    if table_has_yellow:
+        # If the table uses yellow, ONLY yellow cells are topics.
+        is_topic = is_yellow
+    else:
+        # Fallback to punctuation heuristic if no yellow is used in the table (e.g. D0000106)
+        is_topic = not value.endswith(('.', ';', ':', '?', '!')) and len(value) < 120 and not value.lower().startswith(('py', 'p.y'))
+
+    if is_topic:
         current_topic = {'konu': value, 'kazanimlar': []}
         result['konu_ve_kazanimlar'].append(current_topic)
     else:
-        if current_topic is not None:
-            current_topic['kazanimlar'].append(value)
-        else:
-            current_topic = {'konu': '', 'kazanimlar': [value]}
+        if current_topic is None:
+            current_topic = {'konu': value, 'kazanimlar': []}
             result['konu_ve_kazanimlar'].append(current_topic)
+        else:
+            current_topic['kazanimlar'].append(value)
     return current_topic
 
 
@@ -300,10 +383,20 @@ def parse_info_table(tbl):
         'eposta': '', 'ders_zamani': '', 'derslik': '',
         'dersin_amaci': '', 'konu_ve_kazanimlar': []
     }
-    current_topic = None
-    in_kk_section = False  # dikey merge devam satırlarını izlemek için
+    
+    # Heuristic tier: Does this table use yellow shading at all?
+    table_has_yellow = False
     for row in tbl.rows:
-        ucells = _unique_cells(row)        # yatay merge kopyalarını düşür
+        ucells = _unique_cells(row)
+        if len(ucells) >= 2:
+            if is_yellow_cell(ucells[1]) or (len(ucells) > 2 and is_yellow_cell(ucells[-1])):
+                table_has_yellow = True
+                break
+
+    current_topic = None
+    in_kk_section = False
+    for row in tbl.rows:
+        ucells = _unique_cells(row)
         if len(ucells) < 2:
             continue
         key        = ucells[0].text.strip()
@@ -317,19 +410,27 @@ def parse_info_table(tbl):
         elif key == 'Ders Zamanı':                  result['ders_zamani']   = value
         elif key == 'Derslik':                      result['derslik']       = value
         elif key == 'Dersin Amacı':                 result['dersin_amaci']  = value
-        elif key in _KK_LABELS:
+        elif any(lbl.lower() in key.lower() for lbl in _KK_LABELS):
             in_kk_section = True
-            if not value:
-                continue                 # boş başlık satırı — sadece bayrağı set et
-            current_topic = _add_kk_value(value, value_cell, result, current_topic)
+            actual_value = value
+            actual_cell = value_cell
+            if not actual_value and len(ucells) > 2:
+                for cand in ucells[1:]:
+                    cv = cand.text.strip()
+                    if cv:
+                        actual_value = cv
+                        actual_cell = cand
+                        break
+            
+            if actual_value:
+                current_topic = _add_kk_value(actual_value, actual_cell, result, current_topic, table_has_yellow)
         elif key == '' and in_kk_section:
-            # Dikey merge devam satırı: içerik son benzersiz hücrede
             cont_cell  = ucells[-1]
             cont_value = cont_cell.text.strip()
             if not cont_value:
                 continue
-            current_topic = _add_kk_value(cont_value, cont_cell, result, current_topic)
-        elif key:                               # bilinen başka bir alan → KK bölümü bitti
+            current_topic = _add_kk_value(cont_value, cont_cell, result, current_topic, table_has_yellow)
+        elif key:
             in_kk_section = False
     return result
 
