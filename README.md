@@ -1,8 +1,6 @@
-# BILMUH 2025-26 Ders Planları — Çıkarım Projesi
+# Ders Planları — Çıkarım Projesi
 
-Gaziosmanpaşa Üniversitesi Bilgisayar Mühendisliği bölümünün
-**Program_Kılavuzu_BILMUH2025-26_19022026.docx** dosyasındaki
-ders planlarını makine-okunabilir JSON formatına dönüştürür.
+Program kılavuzu DOCX dosyalarındaki ders planlarını makine-okunabilir JSON formatına dönüştürür.
 
 ---
 
@@ -44,6 +42,39 @@ ders_planlari_cikti/
 pip install python-docx lxml
 ```
 
+### Genel Kullanım
+
+Scriptler artık varsayılan olarak proje kökündeki ilk uygun `.docx` dosyasını bulmaya çalışır.
+Farklı programlar için en güvenlisi, DOCX ve çıktı yollarını açıkça vermektir.
+
+> Not: Mevcut extractor'lar DOCX yapısı (başlıklar, tablolar, hücre biçimleri) üzerinden çalışır.
+> PDF dosyaları doğrudan desteklenmez; PDF->DOCX dönüşümü çoğu zaman tablo yapısını bozduğu için
+> eksik/boş çıktı üretir. Sağlıklı sonuç için orijinal program kılavuzu DOCX dosyasını kullanın.
+
+```bash
+python3 ders_planlari_extractor.py \
+  --docx "/tam/yol/Program_Kilavuzu.docx" \
+  --out "/tam/yol/ders_planlari.json" \
+  --img-base "/tam/yol/ders_gorselleri"
+
+python3 ogretim_elemanlari_extractor.py \
+  --docx "/tam/yol/Program_Kilavuzu.docx" \
+  --out "/tam/yol/ogretim_elemanlari.json" \
+  --img-base "/tam/yol/ogretim_elemanlari_foto"
+
+python3 program_yeterlilikleri_extractor.py --docx "/tam/yol/Program_Kilavuzu.docx"
+python3 program_yeterlilik_extractor.py --docx "/tam/yol/Program_Kilavuzu.docx"
+```
+
+### BÖTE Örneği
+
+```bash
+python3 program_yeterlilikleri_extractor.py --docx "/tam/yol/BOTE_Program_Kilavuzu.docx" --out "program_yeterlilikleri_bote.json"
+python3 program_yeterlilik_extractor.py --docx "/tam/yol/BOTE_Program_Kilavuzu.docx" --out "ders_program_yeterlilikleri_bote.json"
+python3 ogretim_elemanlari_extractor.py --docx "/tam/yol/BOTE_Program_Kilavuzu.docx" --out "ogretim_elemanlari_bote.json" --img-base "ogretim_elemanlari_foto_bote"
+python3 ders_planlari_extractor.py --docx "/tam/yol/BOTE_Program_Kilavuzu.docx" --out "ders_planlari_bote.json" --img-base "ders_gorselleri_bote"
+```
+
 ### Çalıştırma
 
 ```bash
@@ -61,9 +92,10 @@ Script şunları üretir:
 python3 ogretim_elemanlari_extractor.py
 ```
 
-Belgenin **öğretim kadrosu** tablosundan (Tablo 4) her elemanın
+Belgedeki öğretim kadrosu tablosunu otomatik bulup her elemanın
 ad-soyad, e-posta, iç hat ve çalışma alanlarını çeker;
 aynı hücredeki gömülü fotoğrafı `ogretim_elemanlari_foto/` klasörüne kaydeder.
+Gerekirse `--table-index` ile tablo index'i elle verilebilir.
 
 ### Program yeterlilikleri
 
@@ -135,6 +167,7 @@ Notlar:
 
 - İsterseniz `--base-url` ile manuel URL verebilirsiniz (site URL veya doğrudan API URL).
 - Scriptlerin hepsi varsayılan olarak ilgili JSON dosyalarını `ders_planlari_cikti/` içinden okur.
+- Farklı bölüm/programlar için yükleyicilerde `--bolum-keyword`, `--bolum-ad`, `--bolum-kod`, `--fakulte-ad`, `--fakulte-kod` argümanları kullanılabilir.
 - `program_yeterlilikleri_yukle.py`, mevcut PY kayıtlarını kod bazında bulur; yoksa oluşturur, açıklama değişmişse günceller.
 - SSL sorununda geçici olarak `--insecure` kullanılabilir.
 
