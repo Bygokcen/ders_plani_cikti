@@ -61,18 +61,90 @@ def parse_ders_zamani(dz_str: str | None, derslik: str | None) -> list:
     return sonuc
 
 
-def build_haftalik(hp_list: list) -> list:
+def _pick_exam_labels(sinav_tarihleri: list | None) -> tuple[str, str, str]:
+    """Sinav listesinde varsa etiketleri kullan, yoksa varsayilanlari don."""
+    ara = 'Ara Sınav'
+    final = 'Final Sınavı'
+    but = 'Bütünleme Sınavı'
+
+    if not sinav_tarihleri:
+        return ara, final, but
+
+    for item in sinav_tarihleri:
+        t = str(item or '').strip()
+        low = t.lower()
+        if not t:
+            continue
+        if 'ara' in low and 'sınav' in low:
+            ara = t
+        elif ('dönem sonu' in low or 'final' in low) and 'sınav' in low:
+            final = t
+        elif 'bütünleme' in low and 'sınav' in low:
+            but = t
+
+    return ara, final, but
+
+
+def build_haftalik(hp_list: list, sinav_tarihleri: list | None = None) -> list:
     """
     [{hafta, ders_konusu, program_yeterliligi}] → WeeklyPlanItemRequest list
     """
-    result = []
-    for i, h in enumerate(hp_list, 1):
-        result.append({
-            'sira': i,
+    ara_label, final_label, but_label = _pick_exam_labels(sinav_tarihleri)
+
+    rows = []
+    for h in hp_list:
+        rows.append({
             'hafta': h.get('hafta'),
             'tarihAraligi': None,
             'konu': h.get('ders_konusu', ''),
             'ilgiliPYler': h.get('program_yeterliligi', '') or ''
+        })
+
+    def has_topic(keyword: str) -> bool:
+        k = keyword.lower()
+        return any(k in str(r.get('konu') or '').lower() for r in rows)
+
+    def insert_after_week(week: int, new_items: list[dict]) -> None:
+        idx = next((i for i, r in enumerate(rows) if r.get('hafta') == week), None)
+        if idx is None:
+            rows.extend(new_items)
+        else:
+            rows[idx + 1:idx + 1] = new_items
+
+    if not has_topic('ara sınav'):
+        insert_after_week(8, [{
+            'hafta': None,
+            'tarihAraligi': None,
+            'konu': ara_label,
+            'ilgiliPYler': ''
+        }])
+
+    final_items = []
+    if not has_topic('final') and not has_topic('dönem sonu sınavı'):
+        final_items.append({
+            'hafta': None,
+            'tarihAraligi': None,
+            'konu': final_label,
+            'ilgiliPYler': ''
+        })
+    if not has_topic('bütünleme sınavı'):
+        final_items.append({
+            'hafta': None,
+            'tarihAraligi': None,
+            'konu': but_label,
+            'ilgiliPYler': ''
+        })
+    if final_items:
+        insert_after_week(14, final_items)
+
+    result = []
+    for i, r in enumerate(rows, 1):
+        result.append({
+            'sira': i,
+            'hafta': r.get('hafta'),
+            'tarihAraligi': r.get('tarihAraligi'),
+            'konu': r.get('konu', ''),
+            'ilgiliPYler': r.get('ilgiliPYler', '') or ''
         })
     return result
 
@@ -94,6 +166,7 @@ def build_payload(ders_kodu: str, ders: dict, offering_id: str) -> dict:
         kaynaklar_str = f"Yardımcı Kaynaklar: {yardimci}"
 
     hp = ders.get('haftalik_plan') or []
+    sinav_tarihleri = ders.get('sinav_tarihleri') or []
 
     return {
         'dersSunumuId': offering_id,
@@ -109,7 +182,7 @@ def build_payload(ders_kodu: str, ders: dict, offering_id: str) -> dict:
         'finalTarihi': None,
         'butunlemeTarihi': None,
         'dersSaatleri': parse_ders_zamani(ders.get('ders_zamani'), ders.get('derslik')),
-        '_haftalik': build_haftalik(hp),
+        '_haftalik': build_haftalik(hp, sinav_tarihleri),
     }
 
 

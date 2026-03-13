@@ -1,0 +1,54 @@
+{
+  "kaynak_docx": "/Users/gokcen/DPK/Program_Kılavuzu_BILMUH2025-26_19022026 copy.docx",
+  "olusturulma_tarihi": "2026-03-13T14:31:26",
+  "kullanilan_tablo_indexleri": [
+    5
+  ],
+  "program_yeterliligi_sayisi": 11,
+  "program_yeterlilikleri": [
+    {
+      "kod": "PY1",
+      "aciklama": "Matematik, fen bilimleri, hesaplama ve bilgisayar mühendisliği konularında kuramsal/ uygulamalı bilgilere ve yeterli altyapıya sahiptir"
+    },
+    {
+      "kod": "PY2",
+      "aciklama": "Mühendislik problemlerini saptar, çözüm için uygun analitik yöntemler ve yaklaşımlar geliştirir, modelleme yöntemlerini ve çözüm için uygun bilişim tekniklerini seçer ve uygular"
+    },
+    {
+      "kod": "PY3",
+      "aciklama": "Mühendislik problemlerinin çözümüne yönelik kaynak tarama, veri toplama, deney tasarlama, deney yapma, sonuçları analiz etme, yorumlama ve uygulamaya aktarma becerisine sahiptir"
+    },
+    {
+      "kod": "PY4",
+      "aciklama": "Problem çözümü sonucunda ortaya çıkacak sistemi, süreci veya ürünü gerçekçi kısıtlar ve koşullar altında, belirli gereksinimleri karşılayacak şekilde tasarlama ve bu amaçla modern yöntemleri uygulama becerisine sahiptir"
+    },
+    {
+      "kod": "PY5",
+      "aciklama": "Sistem tasarımının gerçekleştirilmesi için tüm kaynakların verimli kullanılması, süreçlerin iyi belirlenmesi ve takip edilmesi ve uygulanması ile etkin proje yönetimini sağlar"
+    },
+    {
+      "kod": "PY6",
+      "aciklama": "Disliplin içi ve disiplinler arası projelerde bireysel, takım üyesi veya takım lideri olarak etkin ve sonuç odaklı çalışır"
+    },
+    {
+      "kod": "PY7",
+      "aciklama": "Alanının gerektirdiği bilişim iletişim teknolojilerini ve en az bir bilgisayar yazılımını Avrupa Bilgisayar Kullanma Lisansı İleri Düzeyinde kullanır"
+    },
+    {
+      "kod": "PY8",
+      "aciklama": "İngilizce ve Türkçe etkin iletişim kurma becerisine sahiptir ve her iki dilide kullanarak bilişim alanındaki bilgileri izler, yorumlar ve teknik doküman hazırlar"
+    },
+    {
+      "kod": "PY9",
+      "aciklama": "Yaşam boyu öğrenmenin gerekliliği bilinci ve farkındalığı ile bilgiye erişebilme, bilim ve teknolojideki gelişmeleri izleme ve kendini sürekli yenileme becerisi kazanır"
+    },
+    {
+      "kod": "PY10",
+      "aciklama": "Mesleki ve etik sorumluluk bilincine sahiptir, bilişim hukuku temel prensiplerini bilir, gelişmeleri takip eder ve mesleki çalışmalarında uygular"
+    },
+    {
+      "kod": "PY11",
+      "aciklama": "Bilişim uygulamalarının kurumsal, toplumsal ve çevresel sonuçlarını göz önünde tutar, bu alanlarda etik bilince sahiptir"
+    }
+  ]
+}

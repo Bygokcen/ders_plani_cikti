@@ -8,13 +8,17 @@ ders planlarını makine-okunabilir JSON formatına dönüştürür.
 
 ## Klasör İçeriği
 
-```
+```text
 ders_planlari_cikti/
 ├── README.md                          ← bu dosya
 ├── ders_planlari_extractor.py         ← ders planı çıkarım scripti
+├── program_yeterlilikleri_extractor.py← program yeterlilik açıklamaları çıkarım scripti
+├── program_yeterlilik_extractor.py    ← ders-program yeterlilik matrisi çıkarım scripti
 ├── ogretim_elemanlari_extractor.py    ← öğretim elemanı + fotoğraf çıkarım scripti
 ├── dogrulama.py                       ← LaTeX ve görsel doğrulama scripti
 ├── ders_planlari.json                 ← 55 dersin tüm verisi (462 KB)
+├── program_yeterlilikleri.json        ← sayfa 8 program yeterlilik açıklamaları
+├── ders_program_yeterlilikleri.json   ← ders-program yeterlilik matrisi
 ├── ogretim_elemanlari.json            ← 19 öğretim elemanı + fotoğraf yolları
 ├── ders_gorselleri/                   ← örnek soruların görselleri (20 dosya)
 │   ├── BM1002/
@@ -47,6 +51,7 @@ python3 ders_planlari_extractor.py
 ```
 
 Script şunları üretir:
+
 - `ders_planlari.json` — tüm 55 dersin güncel verisi
 - `ders_gorselleri/<KOD>/soru_N.{png|jpeg|emf}` — gömülü görseller
 
@@ -60,6 +65,24 @@ Belgenin **öğretim kadrosu** tablosundan (Tablo 4) her elemanın
 ad-soyad, e-posta, iç hat ve çalışma alanlarını çeker;
 aynı hücredeki gömülü fotoğrafı `ogretim_elemanlari_foto/` klasörüne kaydeder.
 
+### Program yeterlilikleri
+
+```bash
+python3 program_yeterlilikleri_extractor.py
+```
+
+Belgedeki program yeterlilikleri tablosundan `PY1 ... PYn` açıklamalarını çıkarır
+ve `program_yeterlilikleri.json` dosyasını üretir.
+
+### Ders-program yeterlilik matrisi
+
+```bash
+python3 program_yeterlilik_extractor.py
+```
+
+Her ders planı tablosundaki `P1/P2/...` kolonlarını okuyup
+`ders_program_yeterlilikleri.json` dosyasını üretir.
+
 ### Doğrulama
 
 ```bash
@@ -72,13 +95,21 @@ Seçili dersler için LaTeX dönüşüm ve görsel yolu çıktısı verir.
 
 ## Canlı Ortama Yükleme
 
-Canlı site: https://yzdd.gop.edu.tr/dpks/
+Canlı site: <https://yzdd.gop.edu.tr/dpks/>
 
 Yükleyici scriptleri artık `--live` parametresiyle canlı API'yi otomatik seçer.
 
 Önerilen sıra:
 
 ```bash
+cd ders_planlari_cikti
+
+# 0) DOCX'ten JSON üretimi
+python3 program_yeterlilikleri_extractor.py
+python3 program_yeterlilik_extractor.py
+python3 ogretim_elemanlari_extractor.py
+python3 ders_planlari_extractor.py
+
 cd ders_planlari_cikti/yukleyici
 
 # 1) OBS dersleri
@@ -93,7 +124,10 @@ python3 akademisyen_ata.py --live --email "admin@gop.edu.tr" --password "..."
 # 4) Ders planı / izlence
 python3 ders_plani_yukle.py --live --email "admin@gop.edu.tr" --password "..."
 
-# 5) Program yeterlilik matrisi
+# 5) Program yeterlilikleri (PY açıklamaları)
+python3 program_yeterlilikleri_yukle.py --live --email "admin@gop.edu.tr" --password "..."
+
+# 6) Program yeterlilik matrisi
 python3 program_yeterlilik_api_uygula.py --live --email "admin@gop.edu.tr" --password "..."
 ```
 
@@ -101,6 +135,7 @@ Notlar:
 
 - İsterseniz `--base-url` ile manuel URL verebilirsiniz (site URL veya doğrudan API URL).
 - Scriptlerin hepsi varsayılan olarak ilgili JSON dosyalarını `ders_planlari_cikti/` içinden okur.
+- `program_yeterlilikleri_yukle.py`, mevcut PY kayıtlarını kod bazında bulur; yoksa oluşturur, açıklama değişmişse günceller.
 - SSL sorununda geçici olarak `--insecure` kullanılabilir.
 
 ---
