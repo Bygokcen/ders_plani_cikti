@@ -1,24 +1,12 @@
 {
-  "base_url": "https://yzdd.gop.edu.tr/dpks-api",
-  "bolum_id": "e4c353b0-66fc-4926-b6f4-362a44a4f91a",
-  "year_id": "3f592639-b639-44ee-b15e-92e2bbf04184",
+  "base_url": "http://localhost:4000/dpks-api",
+  "bolum_id": "e1dacff2-0ec4-4f49-a2e7-8805be0a403f",
+  "year_id": "7336459e-7219-4f23-8ec1-c16d9ea58638",
   "dry_run": false,
   "offering_count": 104,
   "mapping_course_count": 57,
   "applied_change_count": 266,
-  "created_outcomes": [
-    "PY1",
-    "PY2",
-    "PY3",
-    "PY4",
-    "PY5",
-    "PY6",
-    "PY7",
-    "PY8",
-    "PY9",
-    "PY10",
-    "PY11"
-  ],
+  "created_outcomes": [],
   "skipped_courses_not_found_in_offerings": [
     "SEÇ201",
     "SEÇ202",

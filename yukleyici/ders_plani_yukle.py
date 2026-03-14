@@ -168,13 +168,20 @@ def build_payload(ders_kodu: str, ders: dict, offering_id: str) -> dict:
     hp = ders.get('haftalik_plan') or []
     sinav_tarihleri = ders.get('sinav_tarihleri') or []
 
+    # ornek_sorular -> JSON stringified array [ { "text": "...", "image": null } ]
+    ornek_sorular_raw = (ders.get('ornek_sorular') or '').strip()
+    ornek_sorular_json = None
+    if ornek_sorular_raw:
+        # Web UI standard format expects an array of objects
+        ornek_sorular_json = json.dumps([{"text": ornek_sorular_raw, "answer": "", "image": None, "layout": "full"}])
+
     return {
         'dersSunumuId': offering_id,
         'amac': ders.get('dersin_amaci') or None,
         'konuKazanim': konu_kazanim_str,
         'olcme': ders.get('degerlendirme') or None,
         'kaynaklar': kaynaklar_str,
-        'ornekSorular': ders.get('ornek_sorular') or None,
+        'ornekSorular': ornek_sorular_json,
         'ofisSaati': ders.get('ofis_saati') or None,
         'dersZamani': ders.get('ders_zamani') or None,
         'odaNumarasi': ders.get('oda_numarasi') or None,

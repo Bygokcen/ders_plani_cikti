@@ -1,0 +1,23 @@
+{
+  "base_url": "http://localhost:4000/dpks-api",
+  "bolum_id": "e1dacff2-0ec4-4f49-a2e7-8805be0a403f",
+  "year_id": "7336459e-7219-4f23-8ec1-c16d9ea58638",
+  "input_json": "/Users/gokcen/DPK/ders_planlari_cikti/program_yeterlilikleri.json",
+  "dry_run": false,
+  "source_count": 11,
+  "created_codes": [
+    "PY1",
+    "PY2",
+    "PY3",
+    "PY4",
+    "PY5",
+    "PY6",
+    "PY7",
+    "PY8",
+    "PY9",
+    "PY10",
+    "PY11"
+  ],
+  "updated_codes": [],
+  "unchanged_codes": []
+}
